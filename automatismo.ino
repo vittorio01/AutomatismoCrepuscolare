@@ -8,14 +8,14 @@
 #define pinLeft   10              //ingresso digitale del tasto left (impulso negativo alla pressione)
 #define resIn     0               //ingresso analogico per la fotoresistenza
 #define relay1    11              //uscita digitale del relè 1
-#define relay2    13              //uscita digitale del relè 2
+#define relay2    12              //uscita digitale del relè 2
 #define refresh   100             //tempo di attesa per nuovo campionamento
 #define ResetSec  86400           //secondi dopo la quale il microcontrollore si riavvia automaticamente
 LiquidCrystal lcd(7,6,5,4,3,2);   //definizione dei piedini del display
 
 //definizione debug mode
-#define DebugMode true    //abilita la modalità di debug (esclude tutto l'hardware input esterno e prende in considerazione gli input solamente la porta seriale)
-#define SerialOut true    //abilita o disabilita l'output anche su porta seriale (da abilitare se si vuole eseguire il debug esclusivamente su porta seriale)
+#define DebugMode false    //abilita la modalità di debug (esclude tutto l'hardware input esterno e prende in considerazione gli input solamente la porta seriale)
+#define SerialOut false    //abilita o disabilita l'output anche su porta seriale (da abilitare se si vuole eseguire il debug esclusivamente su porta seriale)
 #define baudrate  9600    //velocità della porta seriale (utilizzata per il debug)
 
 //definizione delle configurazioni
@@ -689,7 +689,7 @@ void modeSetup() {
       }
     }
     if (input==3) {
-      if (value < 65025) {
+      if (value < 998) {
         value++;
       }
     }
@@ -709,7 +709,7 @@ void modeSetup() {
       }
     }
     if (input==3) {
-      if (value < 65025) {
+      if (value < 998) {
         value++;
       }
     }
@@ -730,7 +730,7 @@ void modeSetup() {
         }
       }
       if (input==3) {
-        if (value < 65025) {
+        if (value < 998) {
           value++;
         }
       }
@@ -749,7 +749,7 @@ void modeSetup() {
         }
       }
       if (input==3) {
-        if (value < 65025) {
+        if (value < 998) {
           value++;
         }
       }
@@ -771,7 +771,7 @@ void modeSetup() {
         }
       }
       if (input==3) {
-        if (value < 65025) {
+        if (value < 998) {
           value++;
         }
       }
