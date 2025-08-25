@@ -1,17 +1,20 @@
-#include <ShiftLcd.h>
+#include "Display.h"
 //20x2 lcd, max 38 per line
-int LCD_EN = 4;
-int LCD_D7 = 5; 
-int SHIFT_SER = 6; 
-int SHIFT_SRCLK = 7;
+#define LCD_SHIFT_EN    4
+#define LCD_SHIFT_D7    5
+#define LCD_SHIFT_SER   6
+#define LCD_SHIFT_CLK   7
 
-ShiftLcd lcd(LCD_EN, LCD_D7, SHIFT_SER, SHIFT_SRCLK);
+#define LCD_FORMAT_ROWS 2
+#define LCD_FORMAT_COLS 38
+
+Display display(LCD_SHIFT_EN, LCD_SHIFT_D7, LCD_SHIFT_SER, LCD_SHIFT_CLK,LCD_FORMAT_ROWS,LCD_FORMAT_COLS);
 
 void setup() {
-  lcd.begin();
-  lcd.write("Hello, World←000000000000000000000");
+  display.screen[0]="ciao";
+  display.update();
 }
 
 void loop() {
-  lcd.scrollLeft(100);
+
 }
