@@ -16,7 +16,7 @@ Display::Display(unsigned int LCD_EN, unsigned int LCD_D7, unsigned int LCD_SER,
         for (int row=0;row<ROWS;row++) {
             screen[row]=new char[lcd_space+1];
         }
-        screen[lcd_space]='\n';
+        
     } else {
         screen=NULL;
     }
@@ -57,10 +57,9 @@ void Display::update() {
 void Display::write(unsigned int row,unsigned int col, String string) {
     if (row>=lcd_rows) return;
     unsigned int string_pos=0;
-    while(string_pos<string.length() && pos<lcd_space) {
+    while(string_pos<string.length() && col<lcd_space) {
         screen[row][col]=string.charAt(string_pos);
         string_pos++;
         col++;
     }
 }
-
