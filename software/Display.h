@@ -14,17 +14,19 @@ class Display {
     unsigned int lcd_clk;
     unsigned int lcd_rows;
     unsigned int lcd_cols;
+    unsigned int lcd_space;
 
     char** screen;
 
     ShiftLcd* lcd;
 
-    Display(unsigned int LCD_EN, unsigned int LCD_D7, unsigned int LCD_SER, unsigned int LCD_CLK, unsigned int ROWS, unsigned int COLS);
+    Display(unsigned int LCD_EN, unsigned int LCD_D7, unsigned int LCD_SER, unsigned int LCD_CLK, unsigned int ROWS, unsigned int COLS, unsigned int MAX_COLS);
     ~Display();
     
     void clear();
     void update();
-    
+    void Display::write(unsigned int row,unsigned int col, String string);
+
 };
 
 

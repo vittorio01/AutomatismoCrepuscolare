@@ -3,18 +3,20 @@
 
 using namespace std;
 
-Display::Display(unsigned int LCD_EN, unsigned int LCD_D7, unsigned int LCD_SER, unsigned int LCD_CLK, unsigned int ROWS, unsigned int COLS) {
+Display::Display(unsigned int LCD_EN, unsigned int LCD_D7, unsigned int LCD_SER, unsigned int LCD_CLK, unsigned int ROWS, unsigned int COLS, unsigned int MAX_COLS) {
     lcd_en=LCD_EN;
     lcd_d7=LCD_D7;
     lcd_ser=LCD_SER;
     lcd_clk=LCD_CLK;
     lcd_rows=ROWS;
     lcd_cols=COLS;
+    lcd_space=MAX_COLS;
     if (ROWS>0) {
         screen= new char*[ROWS];
         for (int row=0;row<ROWS;row++) {
-            screen[row]=new char[lcd_cols+1];
+            screen[row]=new char[lcd_space+1];
         }
+        screen[lcd_space]='\n';
     } else {
         screen=NULL;
     }
@@ -37,10 +39,10 @@ Display::~Display() {
 void Display::clear() {
     lcd->clear();
     for (int row=0;row<lcd_rows;row++) {
-        for (int col=0;col<lcd_cols-1;col++) {
+        for (int col=0;col<lcd_space-1;col++) {
             screen[row][col]=' ';
         }
-        screen[row][lcd_cols-1]='\n';
+        screen[row][lcd_space-1]='\n';
     }
 }
 void Display::update() {
@@ -51,4 +53,14 @@ void Display::update() {
         lcd->write(screen[0],screen[1]);
     }
 }
-    
+
+void Display::write(unsigned int row,unsigned int col, String string) {
+    if (row>=lcd_rows) return;
+    unsigned int string_pos=0;
+    while(string_pos<string.length() && pos<lcd_space) {
+        screen[row][col]=string.charAt(string_pos);
+        string_pos++;
+        col++;
+    }
+}
+
