@@ -54,3 +54,25 @@ void Settings::setTimerOff(unsigned int value) {
 void Settings::setBuzzer(bool value) {
     values.buzzer=value;
 }
+
+unsigned int Settings::getPower1() {
+    return values.power1;
+}
+unsigned int Settings::getPower2() {
+    return values.power2;
+}
+unsigned int Settings::getPower3() {
+    return values.power3;
+}
+unsigned int Settings::getPower4() {
+    return values.power4;
+}
+unsigned int Settings::getTimerOn() {
+    return defaultTimerOn;
+}
+unsigned int Settings::getTimerOff() {
+    return defaultTimerOff;
+}
+bool Settings::getBuzzer() {
+    return buzzer;
+}

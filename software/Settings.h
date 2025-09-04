@@ -13,6 +13,8 @@
 #define DEFAULT_TIMERON     10
 #define DEFAULT_BUZZER      true 
 
+#define MAX_SETTINGS_BOUND  65536
+
 using namespace std;
 
 typedef struct SettingsValues{
@@ -46,6 +48,14 @@ class Settings {
     void setTimerOn(unsigned int value);
     void setTimerOff(unsigned int value);
     void setBuzzer(bool value);
+
+    unsigned int getPower1();
+    unsigned int getPower2();
+    unsigned int getPower3();
+    unsigned int getPower4();
+    unsigned int getTimerOn();
+    unsigned int getTimerOff();
+    bool getBuzzer();
 };
 
 
