@@ -3,7 +3,7 @@
 
 #include "Arduino.h"
 
-typedef enum {START,STOP,OFF} counterStatus;
+typedef enum {START,STOP,OFF,ON} counterStatus;
 
 class Relays {
     private: 

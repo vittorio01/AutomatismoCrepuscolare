@@ -32,6 +32,21 @@ counterStatus Relays::getDirection(unsigned int relay) {
 
 void Relays::updateStatus() {
     for (unsigned int r=0;r<number;r++) {
-        if (counters[r]>0) counters[r]--;
+        switch (status[r]) {
+            case START:
+                if (counters[r]>0) {
+                    counters--;
+                } else {
+                    status[r]=ON;
+                }
+            break;
+            case STOP:
+                if (counters[r]>0) {
+                    counters--;
+                } else {
+                    status[r]=OFF;
+                }
+            break;
+        }
     }
 }
