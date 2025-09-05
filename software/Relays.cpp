@@ -6,15 +6,18 @@ Relays::Relays(unsigned int relays) {
     number=relays;
     counters= new unsigned int [number];
     status= new counterStatus [number];
+    changedFlags= new bool[number];
     for (unsigned int r=0;r<number;r++) {
         counters[r]=0;
         status[r]=OFF;
+        changedFlags[r]=false;
     }
 }
 Relays::~Relays() {
     if (number>0) {
         delete [] counters;
         delete [] status;
+        delete [] changedFlags;
     }
 }
 
@@ -38,6 +41,7 @@ void Relays::updateStatus() {
                     counters--;
                 } else {
                     status[r]=ON;
+                    changedFlags[r]=true;
                 }
             break;
             case STOP:
@@ -45,8 +49,16 @@ void Relays::updateStatus() {
                     counters--;
                 } else {
                     status[r]=OFF;
+                    changedFlags[r]=true;
                 }
             break;
         }
     }
+}
+
+bool Relays::getChanged(unsigned int relay) {
+    return changedFlags[relay];
+}
+void Relays::clearFlag(unsigned int relay) {
+    changedFlags[relay]=false;
 }

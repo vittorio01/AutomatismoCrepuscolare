@@ -35,6 +35,7 @@
 #define BUTTON_RESOLUTION         200
 
 #define BUTTON_PRESSED_TONE       200
+#define ALARM_TONE                5000
 
 typedef enum {CONTROL,MINUS,PLUS,NONE} button;
 typedef enum {GENERAL,SETTINGS,VIEW1,VIEW2,VIEW3,VIEW4} view;
@@ -47,7 +48,6 @@ Relays* counters;
 void control();
 void update();
 void generateTone(int toneDelay);
-void generate_alarm(int toneDelay);
 button waitButton();
 
 view currentView;
@@ -402,6 +402,7 @@ void update() {
     counters->updateStatus();
 
     int leftPower=currentPower;
+    bool changes=false;
     for (int l=0;l<LOADS_NUMBER;l++) {
       if (!options->getMask(l)) {
         leftPower-=options->getPower(l);
@@ -414,14 +415,17 @@ void update() {
           break;
           case ON:
             if (leftPower<0) counters->setCount(l,options->getTimerOff(),STOP);
+            changes=changes || counters->getChanged(l);
           break;
           case OFF:
             if (leftPower>0) counters->setCount(l,options->getTimerOn(),START);
+            changes=changes || counters->getChanged(l);
           break;
         }
       } else {
         counters->setCount(l,0,OFF);
       }
+      counters->clearFlag(l);
     }
 
     if (counters->getDirection(0)==START || counters->getDirection(0)==OFF) digitalWrite(RELAY1_PIN,false);
@@ -432,6 +436,8 @@ void update() {
     else digitalWrite(RELAY3_PIN,true);
     if (counters->getDirection(3)==START || counters->getDirection(3)==OFF) digitalWrite(RELAY4_PIN,false);
     else digitalWrite(RELAY4_PIN,true);
+
+    if (changes) generateTone(ALARM_TONE);
   }
   
   switch (currentView) {
@@ -650,7 +656,4 @@ void update() {
 void generateTone(int toneDelay) {
   if (options->getBuzzer()) tone(BUZZER_PIN, BUZZER_FREQUENCY, toneDelay);
 
-}
-void generate_alarm(int toneDelay) {
-  if (options->getBuzzer()) tone(BUZZER_PIN, BUZZER_FREQUENCY, toneDelay);
 }
