@@ -32,13 +32,20 @@
 #define BUZZER_FREQUENCY          3500
 
 #define DISPLAY_REFRESH_RATE      100000
-#define BUTTON_RESOLUTION         100
+#define BUTTON_RESOLUTION         200
 
 #define BUTTON_PRESSED_TONE       200
 #define ALARM_TONE                5000
 
 typedef enum {CONTROL,MINUS,PLUS,NONE} button;
-typedef enum {GENERAL,SETTINGS,VIEW1,VIEW2,VIEW3,VIEW4} view;
+typedef enum {
+  GENERAL,
+  SETTINGS_POWER,
+  SETTINGS_MASK,
+  SETTINGS_TIMERON,
+  SETTINGS_TIMEROFF,
+  SETTINGS_BUZZER
+} view;
 
 Display* screen;
 Settings* options;
@@ -52,6 +59,9 @@ button waitButton();
 view currentView;
 bool blinkStatus;
 unsigned int secondCounter;
+unsigned int buttonCounter;
+unsigned short currentSubView;
+button pressedButton;
 
 void setup() {
   noInterrupts(); 
@@ -74,13 +84,14 @@ void setup() {
   currentView=GENERAL;
   blinkStatus=false;
   secondCounter=1000000/DISPLAY_REFRESH_RATE;
+  buttonCounter=BUTTON_RESOLUTION/DISPLAY_REFRESH_RATE;
+  pressedButton=NONE;
 
   screen=new Display(LCD_SHIFT_EN, LCD_SHIFT_D7, LCD_SHIFT_SER, LCD_SHIFT_CLK,LCD_FORMAT_ROWS,LCD_FORMAT_COLS,LCD_MAX_COLS);
   options=new Settings();
   light=new Sensor(PHOTO_PIN,PHOTO_BASEVALUE,PHOTO_INCREMENT);
   counters=new Relays(4);
   
-  attachInterrupt(0,setup_editor,LOW);
   options->loadSaved(SETTINGS_ADDRESS);
 
   Timer1.initialize((DISPLAY_REFRESH_RATE/2));
@@ -396,31 +407,7 @@ void setup_editor() {
 
 void update() {
   unsigned int currentPower=light->getCurrentPower();
-
-  if (!digitalRead(PLUS_BUTTON)) {
-    switch(currentView) {
-      case GENERAL:
-        currentView=VIEW1;
-      break;
-
-      case VIEW1:
-        currentView=VIEW2;
-      break;
-
-      case VIEW2:
-        currentView=VIEW3;
-      break;
-
-      case VIEW3:
-        currentView=VIEW4;
-      break;
-
-      default:
-        currentView=GENERAL;
-      break;
-    }
-  }
-
+  
   if (secondCounter>0) {
     secondCounter--;
   } else {
@@ -465,213 +452,149 @@ void update() {
     else digitalWrite(RELAY4_PIN,false);
 
   }
+
+  button detectedButton=NONE;
+  if (!digitalRead(PLUS_BUTTON)) detectedButton=PLUS;
+  if (!digitalRead(MINUS_BUTTON)) detectedButton=MINUS;
+  if (!digitalRead(SELECT_BUTTON)) detectedButton=SELECT;
+  if (detectedButton==pressedButton) {
+    if (buttonCounter>0) buttonCounter--;
+    else {
+      buttonCounter=BUTTON_RESOLUTION/DISPLAY_REFRESH_RATE;
+      pressedButton=detectedButton;
+    }
+  }
   
   switch (currentView) {
     case GENERAL:
-      screen->write(0,0,"Potenza:  ");
-      screen->write(0,10,String(currentPower)+"W    ");
-      if (!digitalRead(RELAY1_PIN)) {
-        screen->write(1,0,"ON   ");
-      } else {
-        screen->write(1,0,"OFF  ");
-      }
-      if (!digitalRead(RELAY2_PIN)) {
-        screen->write(1,5,"ON   ");
-      } else {
-        screen->write(1,5,"OFF  ");
-      }
-      if (!digitalRead(RELAY3_PIN)) {
-        screen->write(1,10,"ON ");
-      } else {
-        screen->write(1,10,"OFF");
-      }
-      if (!digitalRead(RELAY4_PIN)) {
-        screen->write(1,15,"ON   ");
-      } else {
-        screen->write(1,15,"OFF  ");
-      }
-
-      switch(counters->getDirection(0)) {
-        case STOP:
-        if(blinkStatus) {
-          screen->write(1,2,String((char) 0b00011111));
+    switch (currentSubView) {
+      case 0:
+        screen->write(0,0,"Potenza:  ");
+        screen->write(0,10,String(currentPower)+"W    ");
+        if (!digitalRead(RELAY1_PIN)) {
+          screen->write(1,0,"ON   ");
         } else {
-          screen->write(1,2,String("  "));
+          screen->write(1,0,"OFF  ");
         }
-        
-        break;
-
-        case START:
-        if(blinkStatus) {
-          screen->write(1,3,String((char) 0b00011110));
+        if (!digitalRead(RELAY2_PIN)) {
+          screen->write(1,5,"ON   ");
         } else {
-          screen->write(1,3,String("  "));
+          screen->write(1,5,"OFF  ");
         }
-        break;
-      }
-      switch(counters->getDirection(1)) {
-        case STOP:
-        if(blinkStatus) {
-          screen->write(1,7,String((char) 0b00011111));
+        if (!digitalRead(RELAY3_PIN)) {
+          screen->write(1,10,"ON ");
         } else {
-          screen->write(1,7,String("  "));
+          screen->write(1,10,"OFF");
         }
-        
-        break;
-
-        case START:
-        if(blinkStatus) {
-          screen->write(1,8,String((char) 0b00011110));
+        if (!digitalRead(RELAY4_PIN)) {
+          screen->write(1,15,"ON   ");
         } else {
-          screen->write(1,8,String("  "));
+          screen->write(1,15,"OFF  ");
         }
-        break;
-      }
-      switch(counters->getDirection(2)) {
-        case STOP:
-        if(blinkStatus) {
-          screen->write(1,12,String((char) 0b00011111));
-        } else {
-          screen->write(1,12,String("  "));
-        }
-        
-        break;
 
-        case START:
-        if(blinkStatus) {
-          screen->write(1,13,String((char) 0b00011110));
-        } else {
-          screen->write(1,13,String("  "));
-        }
-        break;
-
-      }
-      switch(counters->getDirection(3)) {
-        case STOP:
-        if(blinkStatus) {
-          screen->write(1,17,String((char) 0b00011111));
-        } else {
-          screen->write(1,17,String("  "));
-        } 
-        
-        break;
-
-        case START:
-        if(blinkStatus) {
-          screen->write(1,18,String((char) 0b00011110));
-        } else {
-          screen->write(1,18,String("  "));
-        }
-        break;
-      }
-    break;
-
-    case VIEW1:
-      screen->write(0,0,"Porta 1:            ");
-      if (!digitalRead(RELAY1_PIN)) {
-        screen->write(0,10,"ON ");
-      } else {
-        screen->write(0,10,"OFF");
-      }
-      switch(counters->getDirection(0)) {
-        case STOP:
-          screen->write(1,0,"Spegnimento in "+String(counters->getCount(0))+"    ");
-        break;
-
-        case START:
-          screen->write(1,0,"Accensione in "+String(counters->getCount(0))+"    ");
-        break;
-
-        default:
-          if (options->getMask(0)) {
-            screen->write(1,0,"Mascherato          ");
+        switch(counters->getDirection(0)) {
+          case STOP:
+          if(blinkStatus) {
+            screen->write(1,2,String((char) 0b00011111));
           } else {
-            screen->write(1,0,"                    ");
+            screen->write(1,2,String("  "));
           }
           
-        break;
-      }
-    break;
+          break;
 
-    case VIEW2:
-      screen->write(0,0,"Porta 2:            ");
-      if (!digitalRead(RELAY2_PIN)) {
-        screen->write(0,10,"ON ");
-      } else {
-        screen->write(0,10,"OFF");
-      }
-      switch(counters->getDirection(1)) {
-        case STOP:
-          screen->write(1,0,"Spegnimento in "+String(counters->getCount(1))+"    ");
-        break;
-
-        case START:
-          screen->write(1,0,"Accensione in "+String(counters->getCount(1))+"    ");
-        break;
-        default:
-          if (options->getMask(1)) {
-            screen->write(1,0,"Mascherato          ");
+          case START:
+          if(blinkStatus) {
+            screen->write(1,3,String((char) 0b00011110));
           } else {
-            screen->write(1,0,"                    ");
+            screen->write(1,3,String("  "));
+          }
+          break;
+        }
+        switch(counters->getDirection(1)) {
+          case STOP:
+          if(blinkStatus) {
+            screen->write(1,7,String((char) 0b00011111));
+          } else {
+            screen->write(1,7,String("  "));
           }
           
-        break;
-      }
-    break;
+          break;
 
-    case VIEW3:
-      screen->write(0,0,"Porta 3:            ");
-      if (!digitalRead(RELAY3_PIN)) {
-        screen->write(0,10,"ON ");
-      } else {
-        screen->write(0,10,"OFF");
-      }
-      switch(counters->getDirection(2)) {
-        case STOP:
-          screen->write(1,0,"Spegnimento in "+String(counters->getCount(2))+"    ");
-        break;
-
-        case START:
-          screen->write(1,0,"Accensione in "+String(counters->getCount(2))+"    ");
-        break;
-
-        default:
-          if (options->getMask(2)) {
-            screen->write(1,0,"Mascherato          ");
+          case START:
+          if(blinkStatus) {
+            screen->write(1,8,String((char) 0b00011110));
           } else {
-            screen->write(1,0,"                    ");
+            screen->write(1,8,String("  "));
+          }
+          break;
+        }
+        switch(counters->getDirection(2)) {
+          case STOP:
+          if(blinkStatus) {
+            screen->write(1,12,String((char) 0b00011111));
+          } else {
+            screen->write(1,12,String("  "));
           }
           
-        break;
-      }
-    break;
+          break;
 
-    case VIEW4:
-      screen->write(0,0,"Porta 4:            ");
-      if (!digitalRead(RELAY4_PIN)) {
-        screen->write(0,10,"ON ");
-      } else {
-        screen->write(0,10,"OFF");
-      }
-      switch(counters->getDirection(3)) {
-        case STOP:
-          screen->write(1,0,"Spegnimento in "+String(counters->getCount(3))+"    ");
-        break;
-
-        case START:
-          screen->write(1,0,"Accensione in "+String(counters->getCount(3))+"    ");
-        break;
-
-        default:
-          if (options->getMask(3)) {
-            screen->write(1,0,"Mascherato          ");
+          case START:
+          if(blinkStatus) {
+            screen->write(1,13,String((char) 0b00011110));
           } else {
-            screen->write(1,0,"                    ");
+            screen->write(1,13,String("  "));
           }
+          break;
+
+        }
+        switch(counters->getDirection(3)) {
+          case STOP:
+          if(blinkStatus) {
+            screen->write(1,17,String((char) 0b00011111));
+          } else {
+            screen->write(1,17,String("  "));
+          } 
           
-        break;
-      }
+          break;
+
+          case START:
+          if(blinkStatus) {
+            screen->write(1,18,String((char) 0b00011110));
+          } else {
+            screen->write(1,18,String("  "));
+          }
+          break;
+        }
+      break;
+      case 1,2,3,4:
+        screen->write(0,0,"Porta "+String(currentSubView)":            ");
+        if (counters->getDirection(currentSubView-1)==ON) {
+          screen->write(0,10,"ON ");
+        } else {
+          screen->write(0,10,"OFF");
+        }
+        switch(counters->getDirection(0)) {
+          case STOP:
+            screen->write(1,0,"Spegnimento in "+String(counters->getCount(currentSubView-1))+"    ");
+          break;
+
+          case START:
+            screen->write(1,0,"Accensione in "+String(counters->getCount(currentSubView-1))+"    ");
+          break;
+
+          default:
+            if (options->getMask(currentSubView-1)) {
+              screen->write(1,0,"Mascherato          ");
+            } else {
+              screen->write(1,0,"                    ");
+            }
+            
+          break;
+        }
+      break;
+    }
     break;
+
 
     default:
     break;
