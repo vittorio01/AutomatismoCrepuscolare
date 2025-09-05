@@ -52,9 +52,7 @@ Settings* options;
 Sensor* light;
 Relays* counters;
 
-void control();
 void update();
-button waitButton();
 
 view currentView;
 bool blinkStatus;
@@ -99,311 +97,7 @@ void setup() {
   interrupts(); 
 }
 
-void loop() {
-
-}
-
-button waitButton() {
-  bool select=false;
-  bool plus=false;
-  bool minus=false;
-  while(!select && !plus && !minus) {
-    delay(BUTTON_RESOLUTION);
-    select=!digitalRead(SELECT_BUTTON);
-    plus=!digitalRead(PLUS_BUTTON);
-    minus=!digitalRead(MINUS_BUTTON);
-  }
-  if (select) return CONTROL;
-  if (plus) return PLUS;
-  if (minus) return MINUS;
-}
-
-void setup_editor() {
-  noInterrupts();
-  Timer1.stop();
-  detachInterrupt(0);
-  interrupts();
-  currentView=SETTINGS;
-  button lastButton;
-
-  screen->clear();
-  screen->write(0,0,"Potenza carichi");
-  screen->update();
-  if (waitButton()==PLUS) {
-    lastButton=NONE;
-    screen->clear();
-    screen->write(0,0,"Potenza carico 1");
-    screen->write(1,0,String((char) 0b00111110)+" ");
-    screen->write(1,2,String(options->getPower(0))+"    ");
-    screen->update();
-    while(lastButton!=CONTROL) {
-      switch (lastButton) {
-        case PLUS:
-          options->setPower(0,options->getPower(0)+1);
-          screen->write(1,2,String(options->getPower(0))+"    ");
-          screen->update();
-        break;
-        case MINUS:
-          options->setPower(0,options->getPower(0)-1);
-          screen->write(1,2,String(options->getPower(0))+"    ");
-          screen->update();
-      }
-      lastButton=waitButton();
-    }
-    
-    lastButton=NONE;
-    screen->clear();
-    screen->write(0,0,"Potenza carico 2");
-    screen->write(1,0,String((char) 0b00111110)+" ");
-    screen->write(1,2,String(options->getPower(1))+"    ");
-    screen->update();
-    while(lastButton!=CONTROL) {
-      switch (lastButton) {
-        case PLUS:
-          options->setPower(1,options->getPower(1)+1);
-          screen->write(1,2,String(options->getPower(1))+"    ");
-          screen->update();
-        break;
-        case MINUS:
-          options->setPower(1,options->getPower(1)-1);
-          screen->write(1,2,String(options->getPower(1))+"    ");
-          screen->update();
-      }
-      lastButton=waitButton();
-    }
-
-    lastButton=NONE;
-    screen->clear();
-    screen->write(0,0,"Potenza carico 3");
-    screen->write(1,0,String((char) 0b00111110)+" ");
-    screen->write(1,2,String(options->getPower(2))+"    ");
-    screen->update();
-    while(lastButton!=CONTROL) {
-      switch (lastButton) {
-        case PLUS:
-          options->setPower(2,options->getPower(2)+1);
-          screen->write(1,2,String(options->getPower(2))+"    ");
-          screen->update();
-        break;
-        case MINUS:
-          options->setPower(2,options->getPower(2)-1);
-          screen->write(1,2,String(options->getPower(2))+"    ");
-          screen->update();
-      }
-      lastButton=waitButton();
-    }
-
-    lastButton=NONE;
-    screen->clear();
-    screen->write(0,0,"Potenza carico 4");
-    screen->write(1,0,String((char) 0b00111110)+" ");
-    screen->write(1,2,String(options->getPower(3))+"    ");
-    screen->update();
-    while(lastButton!=CONTROL) {
-      switch (lastButton) {
-        case PLUS:
-          options->setPower(3,options->getPower(3)+1);
-          screen->write(1,2,String(options->getPower(3))+"    ");
-          screen->update();
-        break;
-        case MINUS:
-          options->setPower(3,options->getPower(2)-1);
-          screen->write(1,2,String(options->getPower(3))+"    ");
-          screen->update();
-      }
-      lastButton=waitButton();
-    }
-  }
-
-  screen->clear();
-  screen->write(0,0,"Maschere");
-  screen->update();
-  if (waitButton()==PLUS) {
-    lastButton=NONE;
-    screen->clear();
-    screen->write(0,0,"Maschera carico 1");
-    screen->write(1,0,String((char) 0b00111110)+" ");
-    screen->update();
-    if (options->getMask(0)) {
-      screen->write(1,2,"ON   ");
-    } else {
-      screen->write(1,2,"OFF  ");
-    }
-    screen->update();
-    while(lastButton!=CONTROL) {
-      switch (lastButton) {
-        case PLUS:
-          options->setMask(0,true);
-          screen->write(1,2,"ON   ");
-          screen->update();
-        break;
-        case MINUS:
-          options->setMask(0,false);
-          screen->write(1,2,"OFF  ");
-          screen->update();
-      }
-      lastButton=waitButton();
-    }
-    
-    lastButton=NONE;
-    screen->clear();
-    screen->write(0,0,"Maschera carico 2");
-    screen->write(1,0,String((char) 0b00111110)+" ");
-    screen->update();
-    if (options->getMask(1)) {
-      screen->write(1,2,"ON ");
-    } else {
-      screen->write(1,2,"OFF");
-    }
-    screen->update();
-    while(lastButton!=CONTROL) {
-      switch (lastButton) {
-        case PLUS:
-          options->setMask(1,true);
-          screen->write(1,2,"ON ");
-          screen->update();
-        break;
-        case MINUS:
-          options->setMask(1,false);
-          screen->write(1,2,"OFF ");
-          screen->update();
-      }
-      lastButton=waitButton();
-    }
-
-    lastButton=NONE;
-    screen->clear();
-    screen->write(0,0,"Maschera carico 3");
-    screen->write(1,0,String((char) 0b00111110)+" ");
-    if (options->getMask(2)) {
-      screen->write(1,2,"ON ");
-    } else {
-      screen->write(1,2,"OFF");
-    }
-    screen->update();
-    while(lastButton!=CONTROL) {
-      switch (lastButton) {
-        case PLUS:
-          options->setMask(2,true);
-          screen->write(1,2,"ON ");
-          screen->update();
-        break;
-        case MINUS:
-          options->setMask(2,false);
-          screen->write(1,2,"OFF ");
-          screen->update();
-      }
-      lastButton=waitButton();
-    }
-
-    lastButton=NONE;
-    screen->clear();
-    screen->write(0,0,"Maschera carico 4");
-    screen->write(1,0,String((char) 0b00111110)+" ");
-    
-    if (options->getMask(3)) {
-      screen->write(1,2,"ON ");
-    } else {
-      screen->write(1,2,"OFF");
-    }
-    screen->update();
-    while(lastButton!=CONTROL) {
-      switch (lastButton) {
-        case PLUS:
-          options->setMask(3,true);
-          screen->write(1,2,"ON ");
-          screen->update();
-        break;
-        case MINUS:
-          options->setMask(3,false);
-          screen->write(1,2,"OFF ");
-          screen->update();
-      }
-      lastButton=waitButton();
-    }
-  }
-
-
-  lastButton=NONE;
-  screen->clear();
-  screen->write(0,0,"Ritardo accensioni");
-  screen->write(1,0,String((char) 0b00111110)+" ");
-  screen->write(1,2,String(options->getTimerOn())+"    ");
-  screen->update();
-  while(lastButton!=CONTROL) {
-    switch (lastButton) {
-      case PLUS:
-        options->setTimerOn(options->getTimerOn()+1);
-        screen->write(1,2,String(options->getTimerOn())+"    ");
-        screen->update();
-      break;
-      case MINUS:
-        options->setTimerOn(options->getTimerOn()-1);
-        screen->write(1,2,String(options->getTimerOn())+"    ");
-        screen->update();
-    }
-    lastButton=waitButton();
-  }
-
-  lastButton=NONE;
-  screen->clear();
-  screen->write(0,0,"Ritardo spegnimenti");
-  screen->write(1,0,String((char) 0b00111110)+" ");
-  screen->write(1,2,String(options->getTimerOff())+"    ");
-  screen->update();
-  while(lastButton!=CONTROL) {
-    switch (lastButton) {
-      case PLUS:
-        options->setTimerOff(options->getTimerOff()+1);
-        screen->write(1,2,String(options->getTimerOff())+"    ");
-        screen->update();
-      break;
-      case MINUS:
-        options->setTimerOff(options->getTimerOff()-1);
-        screen->write(1,2,String(options->getTimerOff())+"    ");
-        screen->update();
-    }
-    lastButton=waitButton();
-  }
-
-  lastButton=NONE;
-  screen->clear();
-  screen->write(0,0,"Avvisi Sonori");
-  screen->write(1,0,String((char) 0b00111110)+" ");
-  
-  if (options->getBuzzer()) {
-    screen->write(1,2,"ON ");
-  } else {
-    screen->write(1,2,"OFF");
-  }
-  screen->update();
-  while(lastButton!=CONTROL) {
-    switch (lastButton) {
-      case PLUS:
-        options->setBuzzer(true);
-        screen->write(1,2,"ON ");
-        screen->update();
-      break;
-      case MINUS:
-        options->setBuzzer(false);
-        screen->write(1,2,"OFF ");
-        screen->update();
-    }
-    lastButton=waitButton();
-  } 
-  screen->clear();
-  options->store(SETTINGS_ADDRESS);
-  
-  
-  
-  
-  delay(5000);
-  noInterrupts();
-  currentView=GENERAL;
-  attachInterrupt(0,setup_editor,LOW);
-  Timer1.start();
-  interrupts();
-}
+void loop() {}
 
 void update() {
   unsigned int currentPower=light->getCurrentPower();
@@ -456,7 +150,7 @@ void update() {
   button detectedButton=NONE;
   if (!digitalRead(PLUS_BUTTON)) detectedButton=PLUS;
   if (!digitalRead(MINUS_BUTTON)) detectedButton=MINUS;
-  if (!digitalRead(SELECT_BUTTON)) detectedButton=SELECT;
+  if (!digitalRead(SELECT_BUTTON)) detectedButton=CONTROL;
   if (detectedButton==pressedButton) {
     if (buttonCounter>0) buttonCounter--;
     else {
@@ -467,146 +161,225 @@ void update() {
   
   switch (currentView) {
     case GENERAL:
-    switch (currentSubView) {
-      case 0:
+      if (pressedButton==PLUS) currentSubView++;
+      if (pressedButton==CONTROL) {
+        currentView=SETTINGS_POWER;
+      }
+      if (currentSubView==0) {
         screen->write(0,0,"Potenza:  ");
         screen->write(0,10,String(currentPower)+"W    ");
-        if (!digitalRead(RELAY1_PIN)) {
-          screen->write(1,0,"ON   ");
+        for (unsigned int l=0;l<LOADS_NUMBER ;l++) {
+          switch (counters->getDirection(l)) {
+            case ON:
+              screen->write(1,(l*5),"ON   ");
+            break;
+            case OFF:
+              screen->write(1,(l*5),"OFF  ");
+            break;
+            case STOP:
+              screen->write(1,(l*5),"ON   ");
+              if(blinkStatus) {
+                screen->write(1,2+(l*5),String((char) 0b00011111));
+              } else {
+                screen->write(1,2+(l*5),String("  "));
+              }
+            break;
+            case START:
+              if(blinkStatus) {
+                screen->write(1,3+(l*5),String((char) 0b00011110));
+              } else {
+                screen->write(1,3+(l*5),String("  "));
+              }
+            break;
+          }
+        }
+
+      } else {
+        if (currentSubView>=LOADS_NUMBER) {
+          currentSubView=0;
+          currentView=GENERAL;
         } else {
-          screen->write(1,0,"OFF  ");
-        }
-        if (!digitalRead(RELAY2_PIN)) {
-          screen->write(1,5,"ON   ");
-        } else {
-          screen->write(1,5,"OFF  ");
-        }
-        if (!digitalRead(RELAY3_PIN)) {
-          screen->write(1,10,"ON ");
-        } else {
-          screen->write(1,10,"OFF");
-        }
-        if (!digitalRead(RELAY4_PIN)) {
-          screen->write(1,15,"ON   ");
-        } else {
-          screen->write(1,15,"OFF  ");
-        }
-
-        switch(counters->getDirection(0)) {
-          case STOP:
-          if(blinkStatus) {
-            screen->write(1,2,String((char) 0b00011111));
-          } else {
-            screen->write(1,2,String("  "));
-          }
-          
-          break;
-
-          case START:
-          if(blinkStatus) {
-            screen->write(1,3,String((char) 0b00011110));
-          } else {
-            screen->write(1,3,String("  "));
-          }
-          break;
-        }
-        switch(counters->getDirection(1)) {
-          case STOP:
-          if(blinkStatus) {
-            screen->write(1,7,String((char) 0b00011111));
-          } else {
-            screen->write(1,7,String("  "));
-          }
-          
-          break;
-
-          case START:
-          if(blinkStatus) {
-            screen->write(1,8,String((char) 0b00011110));
-          } else {
-            screen->write(1,8,String("  "));
-          }
-          break;
-        }
-        switch(counters->getDirection(2)) {
-          case STOP:
-          if(blinkStatus) {
-            screen->write(1,12,String((char) 0b00011111));
-          } else {
-            screen->write(1,12,String("  "));
-          }
-          
-          break;
-
-          case START:
-          if(blinkStatus) {
-            screen->write(1,13,String((char) 0b00011110));
-          } else {
-            screen->write(1,13,String("  "));
-          }
-          break;
-
-        }
-        switch(counters->getDirection(3)) {
-          case STOP:
-          if(blinkStatus) {
-            screen->write(1,17,String((char) 0b00011111));
-          } else {
-            screen->write(1,17,String("  "));
-          } 
-          
-          break;
-
-          case START:
-          if(blinkStatus) {
-            screen->write(1,18,String((char) 0b00011110));
-          } else {
-            screen->write(1,18,String("  "));
-          }
-          break;
-        }
-      break;
-      case 1,2,3,4:
-        screen->write(0,0,"Porta "+String(currentSubView)":            ");
-        if (counters->getDirection(currentSubView-1)==ON) {
-          screen->write(0,10,"ON ");
-        } else {
-          screen->write(0,10,"OFF");
-        }
-        switch(counters->getDirection(0)) {
-          case STOP:
-            screen->write(1,0,"Spegnimento in "+String(counters->getCount(currentSubView-1))+"    ");
-          break;
-
-          case START:
-            screen->write(1,0,"Accensione in "+String(counters->getCount(currentSubView-1))+"    ");
-          break;
-
-          default:
-            if (options->getMask(currentSubView-1)) {
-              screen->write(1,0,"Mascherato          ");
-            } else {
-              screen->write(1,0,"                    ");
-            }
+          screen->write(0,0,"Porta "+String(currentSubView)+":            ");
+          switch(counters->getDirection(0)) {
+            case ON:
+              screen->write(0,10,"ON ");
+              break;
+            case STOP:
+              screen->write(0,10,"ON ");
+              screen->write(1,0,"Spegnimento in "+String(counters->getCount(currentSubView-1))+"    ");
+            break;
             
-          break;
+            case OFF:
+              screen->write(0,10,"OFF");
+              if (options->getMask(currentSubView-1)) {
+                screen->write(1,0,"Mascherato          ");
+              } else {
+                screen->write(1,0,"                    ");
+              }
+              break;
+            case START:
+              screen->write(0,10,"OFF");
+              screen->write(1,0,"Accensione in "+String(counters->getCount(currentSubView-1))+"    ");
+            break;
+          }
         }
-      break;
-    }
+      }
+    break;
+    case SETTINGS_MASK:
+      switch (pressedButton) {
+        case PLUS:
+          if (currentSubView==0) currentSubView=1;
+          else if (currentSubView<LOADS_NUMBER) options->setMask((currentSubView-1),true);
+        break;
+
+        case MINUS:
+          if (currentSubView==0) currentSubView=1;
+          else if (currentSubView<LOADS_NUMBER) options->setMask((currentSubView-1),false);
+        break;
+
+        case CONTROL:
+          if (currentSubView>0) {
+            if (currentSubView>=LOADS_NUMBER) {
+              currentSubView=0;
+              currentView=SETTINGS_TIMERON;
+            }
+            else {
+              currentSubView++;
+            }
+          } else {
+            currentSubView=0;
+            currentView=SETTINGS_TIMERON;
+          }
+        break;
+      }
+      if (currentSubView==0) {
+        screen->clear();
+        screen->write(0,0,"Maschere");
+      } else {
+        screen->write(0,0,"Maschera carico "+String(currentSubView)+"     ");
+        screen->write(1,0,String((char) 0b00111110)+" ");
+        if (options->getMask(currentSubView-1)) {
+          screen->write(1,2,String("ON "));
+        } else {
+          screen->write(1,2,String("OFF "));
+        }
+        
+      }
     break;
 
+    case SETTINGS_POWER:
+      switch (pressedButton) {
+        case PLUS:
+          if (currentSubView==0) currentSubView=1;
+          else if (currentSubView<LOADS_NUMBER) options->setPower((currentSubView-1),options->getPower(currentSubView-1)+1);
+        break;
+
+        case MINUS:
+          if (currentSubView==0) currentSubView=1;
+          else if (currentSubView<LOADS_NUMBER) options->setPower((currentSubView-1),options->getPower(currentSubView-1)-1);
+        break;
+
+        case CONTROL:
+          if (currentSubView>0) {
+            if (currentSubView>=LOADS_NUMBER) {
+              currentSubView=0;
+              currentView=SETTINGS_MASK;
+            }
+            else {
+              currentSubView++;
+            }
+          } else {
+            currentSubView=0;
+            currentView=SETTINGS_MASK;
+          }
+        break;
+      }
+      if (currentSubView==0) {
+        screen->clear();
+        screen->write(0,0,"Potenza carichi     ");
+      } else {
+        screen->write(0,0,"Potenza carico "+String(currentSubView)+"     ");
+        screen->write(1,0,String((char) 0b00111110)+" ");
+        screen->write(1,2,String(options->getPower(currentSubView-1))+"    ");
+      }
+    break;
+
+    case SETTINGS_TIMERON:
+      switch (pressedButton) {
+        case PLUS:
+          options->setTimerOn(options->getTimerOn()+1);
+        break;
+
+        case MINUS:
+          options->setTimerOn(options->getTimerOn()-1);
+        break;
+
+        case CONTROL:
+          currentView=SETTINGS_TIMEROFF;
+        break;
+      }
+      screen->clear();
+      screen->write(0,0,"Timer allaccio ");
+      screen->write(1,0,String((char) 0b00111110)+" ");
+      screen->write(1,2,String(options->getTimerOn())+"    ");
+    
+    break;
+
+    case SETTINGS_TIMEROFF:
+      switch (pressedButton) {
+        case PLUS:
+          options->setTimerOff(options->getTimerOff()+1);
+        break;
+
+        case MINUS:
+          options->setTimerOff(options->getTimerOff()-1);
+        break;
+
+        case CONTROL:
+          currentView=SETTINGS_TIMEROFF;
+        break;
+      }
+      screen->clear();
+      screen->write(0,0,"Timer distacco ");
+      screen->write(1,0,String((char) 0b00111110)+" ");
+      screen->write(1,2,String(options->getTimerOff())+"    ");
+    
+    break;
+
+    case SETTINGS_BUZZER:
+      switch (pressedButton) {
+        case PLUS:
+          options->setBuzzer(true);
+        break;
+
+        case MINUS:
+          options->setBuzzer(false);
+        break;
+
+        case CONTROL:
+          Timer1.stop();
+          screen->clear();
+          delay(2000);
+          currentView=GENERAL;
+          currentSubView=0;
+          options->store(SETTINGS_ADDRESS);
+          Timer1.start();
+        break;
+      }
+      screen->clear();
+      screen->write(0,0,"Avvisi sonori ");
+      screen->write(1,0,String((char) 0b00111110)+" ");
+      if (options->getBuzzer()) {
+        screen->write(1,2,"OFF    ");
+      } else {
+        screen->write(1,2,"ON     ");
+      }
+    
+    break;
 
     default:
+      currentView=GENERAL;
     break;
   }
   screen->update();
-}
-
-void generateTone(int toneDelay) {
-  /*
-  noInterrupts();
-  if (options->getBuzzer()) tone(BUZZER_PIN, BUZZER_FREQUENCY, toneDelay);
-  interrupts();
-  */
-
 }
